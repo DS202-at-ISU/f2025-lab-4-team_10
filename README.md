@@ -47,18 +47,16 @@ library(janitor)
 ``` r
 library(readr)
 
-# Scrape the webpage
+
 url <- "https://www.baseball-reference.com/awards/hof_2025.shtml"
 html <- read_html(url)
 tables <- html_table(html)
 raw <- tables[[1]]
 
-# Use first row as column names
 colnames(raw) <- as.character(unlist(raw[1, ]))
 data <- raw[-1, ]  
 data <- as.data.frame(data, stringsAsFactors = FALSE)
 
-# Clean column names
 data <- data %>% janitor::clean_names()
 colnames(data) <- make.names(colnames(data), unique = TRUE)
 
@@ -81,7 +79,6 @@ print(colnames(data))
     ## [36] "hr_2"         "bb_2"         "so"           "pos_summary"
 
 ``` r
-# Convert numeric columns
 cleaned <- data
 
 if("votes" %in% names(cleaned)) {
@@ -109,7 +106,6 @@ if("hofs" %in% names(cleaned)) {
   cleaned$hofs <- as.numeric(cleaned$hofs)
 }
 
-# Check the scraped data
 head(cleaned)
 ```
 
@@ -181,23 +177,20 @@ str(cleaned)
     ##  $ pos_summary : chr  "*9*8H7D/1" "*1/H" "*1" "*8*9*DH/73" ...
 
 ``` r
-# Transform to match Lahman HallOfFame format
-# Calculate total ballots (you may need to look this up or extract from the page)
-total_ballots <- 394  # This is the actual number for 2025, adjust if needed
+total_ballots <- 394  
 
 HallOfFame_2025 <- cleaned %>%
   mutate(
-    playerID = gsub(" ", "", tolower(name)),  # Simple playerID creation
+    playerID = gsub(" ", "", tolower(name)),  
     yearID = 2025,
     votedBy = "BBWAA",
     ballots = total_ballots,
-    needed = ceiling(ballots * 0.75),  # 75% threshold
+    needed = ceiling(ballots * 0.75),  
     inducted = ifelse(votes >= needed, "Y", "N"),
     category = "Player"
   ) %>%
   select(playerID, yearID, votedBy, ballots, needed, votes, inducted, category)
 
-# View the final dataset
 head(HallOfFame_2025)
 ```
 
@@ -210,10 +203,8 @@ head(HallOfFame_2025)
     ## 6    chaseutley   2025   BBWAA     394    296   157        N   Player
 
 ``` r
-# Save as CSV (required deliverable)
 write.csv(HallOfFame_2025, file = "HallOfFame_2025.csv", row.names = FALSE)
 
-# Or use readr version
 readr::write_csv(HallOfFame_2025, file = "HallOfFame_2025.csv")
 ```
 
