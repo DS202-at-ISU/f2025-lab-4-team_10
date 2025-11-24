@@ -21,21 +21,9 @@ you are done with your submission.
 
 ``` r
 library(rvest)
-```
-
-    ## 
-    ## Attaching package: 'rvest'
-
-    ## The following object is masked from 'package:readr':
-    ## 
-    ##     guess_encoding
-
-``` r
 library(dplyr)
 library(janitor)
 ```
-
-    ## Warning: package 'janitor' was built under R version 4.5.2
 
     ## 
     ## Attaching package: 'janitor'
@@ -243,3 +231,121 @@ For future years: update URL year, yearID, and ballot count
 ### Output
 
 Saved as `HallOfFame_2025.csv`
+
+### Maya’s Work
+
+``` r
+library(dplyr)
+library(ggplot2)
+library(Lahman)
+
+hof_lahman_2025 <- HallOfFame %>%
+filter(yearID == 2025, votedBy == "BBWAA") %>%
+arrange(desc(votes))
+
+#candidates
+nrow(hof_lahman_2025)
+```
+
+    ## [1] 28
+
+``` r
+nrow(HallOfFame_2025)
+```
+
+    ## [1] 28
+
+``` r
+sum(hof_lahman_2025$votes, na.rm = TRUE)
+```
+
+    ## [1] 2667
+
+``` r
+sum(HallOfFame_2025$votes, na.rm = TRUE)
+```
+
+    ## [1] 2667
+
+``` r
+cleaned %>%
+arrange(desc(votes)) %>%
+select(name, votes, percent_vote, war) %>%
+head(10)
+```
+
+    ##               name votes percent_vote   war
+    ## 1    Ichiro Suzuki   393         99.7  60.0
+    ## 2      CC Sabathia   342         86.8  62.3
+    ## 3     Billy Wagner   325         82.5  27.7
+    ## 4   Carlos Beltrán   277         70.3  70.0
+    ## 5     Andruw Jones   261         66.2  62.7
+    ## 6      Chase Utley   157         39.8  64.6
+    ## 7   Alex Rodriguez   146         37.1 117.4
+    ## 8    Manny Ramirez   135         34.3  69.3
+    ## 9    Andy Pettitte   110         27.9  60.2
+    ## 10 Félix Hernández    81         20.6  49.8
+
+``` r
+#quick check 
+cleaned %>%
+filter(!is.na(war), !is.na(percent_vote)) %>%
+ggplot(aes(x = war, y = percent_vote)) +
+geom_point() +
+labs(
+title = "Hall of Fame 2025: WAR vs BBWAA vote share",
+x = "Career WAR",
+y = "Percent of votes"
+)
+```
+
+![](README_files/figure-gfm/mayas%20work-1.png)<!-- -->
+
+``` r
+#bar chart 
+cleaned %>%
+arrange(desc(votes)) %>%
+slice_head(n = 15) %>%
+ggplot(aes(x = reorder(name, votes), y = votes)) +
+geom_col() +
+coord_flip() +
+labs(
+title = "Top 15 vote getters on the 2025 Hall of Fame ballot",
+x = "Player",
+y = "Number of votes"
+)
+```
+
+![](README_files/figure-gfm/mayas%20work-2.png)<!-- -->
+
+### Maya (Notes on my Process)
+
+For my part of the assignment, I really wanted to double-check that our
+scraped dataset lined up with the official Lahman HallOfFame data so I
+knew nothing got lost or duplicated along the way. I pulled the 2025
+BBWAA voting results directly from Lahman and compared them with the
+table Deesha scraped. Both datasets had the same number of candidates
+(28), and the total number of votes added up to the exact same amount
+(2667). That immediately made me feel confident that our version was
+accurate.
+
+After that, I looked at the top vote-getters by sorting our cleaned
+dataset in descending order. I printed out their names, vote counts,
+percent of the vote, and WAR values just to get a sense of whether the
+results matched what I expected. Seeing Ichiro and CC Sabathia at the
+top was a good sign that everything aligned with baseball reality and
+that the scraped data made sense.
+
+Once the basic checks lined up, I wanted to visualize the data a bit. My
+first plot looked at WAR versus percent of the vote, mostly because I
+was curious whether players with higher WAR generally get more support
+from the writers. The pattern showed up the way I expected since
+stronger career stats tend to lead to higher vote percentages, but there
+were still a couple interesting outliers. I also made a bar chart of the
+top 15 vote-getters, which made it easier to see how much higher players
+like Ichiro and CC Sabathia ranked compared to everyone else.
+
+Overall, my main goal in this section was to validate that our scraped
+dataset matched Lahman’s version and then explore the 2025 ballot in a
+simple, visual way. Everything matched up perfectly, so I feel confident
+about the dataset our team is submitting.
