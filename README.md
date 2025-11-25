@@ -22,8 +22,23 @@ you are done with your submission.
 ``` r
 library(rvest)
 library(dplyr)
+options(repos = c(CRAN = "https://cloud.r-project.org"))
+install.packages("janitor")
+```
+
+    ## Installing package into 'C:/Users/tripa/AppData/Local/R/win-library/4.5'
+    ## (as 'lib' is unspecified)
+
+    ## package 'janitor' successfully unpacked and MD5 sums checked
+    ## 
+    ## The downloaded binary packages are in
+    ##  C:\Users\tripa\AppData\Local\Temp\RtmpUFtB84\downloaded_packages
+
+``` r
 library(janitor)
 ```
+
+    ## Warning: package 'janitor' was built under R version 4.5.2
 
     ## 
     ## Attaching package: 'janitor'
@@ -349,3 +364,49 @@ Overall, my main goal in this section was to validate that our scraped
 dataset matched Lahman’s version and then explore the 2025 ballot in a
 simple, visual way. Everything matched up perfectly, so I feel confident
 about the dataset our team is submitting.
+
+### Som’s Work
+
+For my part, I wanted to see which 2025 Hall of Fame candidates were
+closest to the 75% BBWAA threshold and how far above or below that line
+they ended up.
+
+``` r
+threshold <- 75
+
+borderline <- cleaned %>%
+  dplyr::filter(!is.na(percent_vote)) %>%
+  dplyr::mutate(
+    diff_from_75 = percent_vote - threshold
+  ) %>%
+  dplyr::arrange(abs(diff_from_75))
+
+# Show the 10 candidates closest to the 75% threshold
+borderline %>%
+  dplyr::select(name, votes, percent_vote, diff_from_75) %>%
+  head(10)
+```
+
+    ##               name votes percent_vote diff_from_75
+    ## 1   Carlos Beltrán   277         70.3         -4.7
+    ## 2     Billy Wagner   325         82.5          7.5
+    ## 3     Andruw Jones   261         66.2         -8.8
+    ## 4      CC Sabathia   342         86.8         11.8
+    ## 5    Ichiro Suzuki   393         99.7         24.7
+    ## 6      Chase Utley   157         39.8        -35.2
+    ## 7   Alex Rodriguez   146         37.1        -37.9
+    ## 8    Manny Ramirez   135         34.3        -40.7
+    ## 9    Andy Pettitte   110         27.9        -47.1
+    ## 10 Félix Hernández    81         20.6        -54.4
+
+### Som’s notes on my process
+
+From the table above, we can see which players in 2025 were closest to
+the 75% Hall of Fame threshold. A few players, like Carlos Beltrán at
+70.3%, are not that far below the cutoff, while others such as Ichiro
+Suzuki (99.7%) and CC Sabathia (86.8%) are well above it. The
+“borderline” players with vote shares in the high-60s to low-70s range
+are the ones who are most interesting, since a small change in the
+voting could have pushed them over the line. This confirms that our
+scraped and cleaned data can be used to identify which candidates just
+missed induction and which ones were clear first-ballot selections.
